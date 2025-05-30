@@ -30,6 +30,24 @@ def load_symbols(symbols_path='HASY/symbols.csv'):
     tab = pd.read_csv(symbols_path, header=None)
     return tab[0].tolist()
 
+def remap_symbol(symbol_id, symbols_path='HASY/symbols.csv'):
+
+    if not os.path.exists(symbols_path):
+        raise FileNotFoundError(f"Nie znaleziono pliku symboli: {symbols_path}")
+
+    # Wczytujemy CSV z nagłówkami: symbol_id, latex, training_samples, test_samples
+    df = pd.read_csv(symbols_path)
+
+    # Filtrujemy wiersz po symbol_id
+    matched = df.loc[df['symbol_id'] == symbol_id, 'latex']
+
+    if matched.empty:
+        raise KeyError(f"Brak symbolu o id={symbol_id} w pliku {symbols_path}")
+
+    # matched.iloc[0] to nasz ciąg LaTeX
+    return matched.iloc[0]
+
+
 def preprocess_image(img_path):
     img = Image.open(img_path).convert('L')
     resample = getattr(Image, 'Resampling', Image).LANCZOS
@@ -37,17 +55,7 @@ def preprocess_image(img_path):
     arr = np.array(img).astype('float32') / 255.0
     return arr.reshape(1, 32, 32, 1)
 
-def show_two_windows(orig_path, processed_arr):
-    orig = cv2.imread(orig_path, cv2.IMREAD_GRAYSCALE)
-    if orig is None:
-        raise FileNotFoundError(f"Nie można wczytać pliku: {orig_path}")
-    proc = (processed_arr.reshape(32,32) * 255).astype(np.uint8)
-    cv2.namedWindow('Oryginał', cv2.WINDOW_AUTOSIZE)
-    cv2.imshow('Oryginał', orig)
-    cv2.namedWindow('Po preprocessingu', cv2.WINDOW_AUTOSIZE)
-    cv2.imshow('Po preprocessingu', proc)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+
 
 def predict(img_path, model_path='hasy_recognition_model.h5', symbols_path='HASY/symbols.csv'):
     model = load_model(model_path)
@@ -65,11 +73,11 @@ if __name__ == '__main__':
         sys.exit(1)
 
     image_path = sys.argv[1]
-    img_arr = preprocess_image(image_path)
-    show_two_windows(image_path, img_arr)
+    
     try:
         symbol, conf = predict(image_path)
-        print(f"Rozpoznany symbol: {symbol} (pewność: {conf:.2%})")
+        znak = remap_symbol(int(symbol))
+        print(f"Rozpoznany symbol: {znak} (pewność: {conf:.2%})")
     except Exception as e:
         print("Błąd podczas predykcji:", e)
         sys.exit(2)

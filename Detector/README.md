@@ -1,1 +1,0 @@
-train 1 to jest stare gówno do rozpoznawania 0-9. Ten dzialajacy model nazywa sie hasy_recognition czy hakos tak. Dziwne rozszerzenie ma ".h5" wysylam ci to ale jeszcze zaraz bede kminil ten kod do rozpoznawania calosci jakby co
