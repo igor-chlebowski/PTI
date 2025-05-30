@@ -8,7 +8,7 @@ IMAGE_PATH = 'test.jpg' # Używamy obrazu, który załadowałeś
 # IMAGE_PATH = 'sciezka/do/twojego/obrazu.jpg'
 
 # --- Konfiguracja dla findContours ---
-MIN_CONTOUR_AREA = 20 # Minimalna powierzchnia konturu, aby uznać go za symbol (do dostrojenia!)
+MIN_CONTOUR_AREA = 10 # Minimalna powierzchnia konturu, aby uznać go za symbol (do dostrojenia!)
 
 # --- Konfiguracja dla Zamknięcia Morfologicznego ---
 # Chcemy połączyć elementy w pionie (np. kreski '=')
@@ -117,33 +117,49 @@ def find_and_draw_contours(original_image, image_to_find_contours_on, min_area_t
 
 def save_rois(image_source_for_roi, boxes, output_folder):
     """
-    Wycina fragmenty obrazu (ROI) na podstawie podanych prostokątów
+    Wycina fragmenty obrazu (ROI) na podstawie podanych prostokątów,
+    dopasowuje każde ROI do kwadratu przez dołożenie białych pikseli
     i zapisuje je do wskazanego folderu.
     """
-    # Sprawdź, czy folder wyjściowy istnieje, jeśli nie - utwórz go
     os.makedirs(output_folder, exist_ok=True)
     print(f"Przygotowano folder wyjściowy: {output_folder}")
 
     saved_count = 0
     for i, (x, y, w, h) in enumerate(boxes):
-        # Wycięcie ROI z obrazu źródłowego (np. binarnego przed zamknięciem)
-        # Używamy współrzędnych Z PADDINGIEM
+        # Wycięcie ROI z obrazu źródłowego
         roi = image_source_for_roi[y:y+h, x:x+w]
-
-        # Sprawdź, czy ROI nie jest puste (np. w=0 lub h=0 po clampingu)
         if roi.size == 0:
             print(f"  - Pominięto pusty ROI dla boxa: {(x, y, w, h)}")
             continue
 
-        # Stworzenie nazwy pliku
-        filename = f"{x}_{y}_{w}_{h}.png" # Używamy PNG dla bezstratnej jakości
-        full_path = os.path.join(output_folder, filename)
+        # --- TU: dopasowanie do kwadratu ---
+        # ustalamy nowy rozmiar = dłuższy bok
+        max_side = max(w, h)
 
-        # Zapisanie ROI do pliku
+        # liczymy ile pikseli dołożyć z każdej strony
+        dw = max_side - w
+        dh = max_side - h
+        pad_left   = dw // 2
+        pad_right  = dw - pad_left
+        pad_top    = dh // 2
+        pad_bottom = dh - pad_top
+
+        # biała ramka w przestrzeni BGR
+        white = [255, 255, 255]
+        roi_square = cv2.copyMakeBorder(
+            roi,
+            top=pad_top, bottom=pad_bottom,
+            left=pad_left, right=pad_right,
+            borderType=cv2.BORDER_CONSTANT,
+            value=white
+        )
+        # ----------------------------------
+
+        filename = f"{x}_{y}_{w}_{h}.png"
+        full_path = os.path.join(output_folder, filename)
         try:
-            cv2.imwrite(full_path, roi)
+            cv2.imwrite(full_path, roi_square)
             saved_count += 1
-            # print(f"  - Zapisano ROI: {filename}")
         except Exception as e:
             print(f"  - BŁĄD podczas zapisywania ROI {filename}: {e}")
 
