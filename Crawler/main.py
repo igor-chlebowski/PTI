@@ -64,7 +64,7 @@ class Crawler:
             digit, conf = predict(leaf_path)
             char = remap_symbol(int(digit))
             print(f"Rozpoznana cyfra: {char} (pewność: {conf:.2%})")
-            return digit
+            return char
         except Exception as e:
             print("Błąd podczas predykcji:", e)
             return '?'

@@ -30,7 +30,7 @@ def load_symbols(symbols_path='HASY/symbols.csv'):
     tab = pd.read_csv(symbols_path, header=None)
     return tab[0].tolist()
 
-def remap_symbol(symbol_id, symbols_path='HASY/symbols.csv'):
+def remap_symbol(symbol_id, symbols_path=os.path.dirname(__file__) + '/HASY/symbols.csv'):
 
     if not os.path.exists(symbols_path):
         raise FileNotFoundError(f"Nie znaleziono pliku symboli: {symbols_path}")
@@ -44,6 +44,7 @@ def remap_symbol(symbol_id, symbols_path='HASY/symbols.csv'):
     if matched.empty:
         raise KeyError(f"Brak symbolu o id={symbol_id} w pliku {symbols_path}")
 
+    print("Znaleziono symbol:", matched.iloc[0], " dla id=", symbol_id)
     # matched.iloc[0] to nasz ciąg LaTeX
     return matched.iloc[0]
 
@@ -80,7 +81,7 @@ if __name__ == '__main__':
     
     try:
         symbol, conf = predict(image_path)
-        znak = remap_symbol(int(symbol))
+        znak = remap_symbol(int(symbol), os.path.join(os.path.dirname(__file__),  'HASY/symbols.csv'))
         print(f"Rozpoznany symbol: {znak} (pewność: {conf:.2%})")
     except Exception as e:
         print("Błąd podczas predykcji:", e)
