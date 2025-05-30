@@ -57,7 +57,11 @@ def preprocess_image(img_path):
 
 
 
-def predict(img_path, model_path='hasy_recognition_model.h5', symbols_path='HASY/symbols.csv'):
+def predict(
+        img_path, 
+        model_path=os.path.join(os.path.dirname(__file__), 'hasy_recognition_model.h5'), 
+        symbols_path=os.path.join(os.path.dirname(__file__),  'HASY/symbols.csv')
+    ):
     model = load_model(model_path)
     symbols = load_symbols(symbols_path)
     img_arr = preprocess_image(img_path)

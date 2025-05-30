@@ -18,7 +18,7 @@ class MajorPredictor:
     def process_image(self, image):
         img = Image.open(image).convert('L')  # Convert to grayscale
 
-        img = img.resize((200, 100))
+        img = img.resize((100, 200))
 
         img_array = np.array(img) 
 

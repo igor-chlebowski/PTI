@@ -44,6 +44,16 @@ def create_file_structure(args, src_dir, dest_dir):
     for r in roots:
         save_tree(r, boxes, children, src_dir, dest_dir)
 
+def print_tree_structure(structure, level=0):
+    """
+    Print the tree structure in a readable format.
+    """
+    indent = "  " * level
+    print(f"{indent}{structure['name']} ({structure['type']}) - {structure.get('detection', 'N/A')}")
+    if 'children' in structure:
+        for child in structure['children']:
+            print_tree_structure(child, level + 1)
+
 
 def main():
     # Main function to execute the image processing workflow
@@ -82,13 +92,7 @@ def main():
     structure = crawler.crawl()
 
     print("Crawled file structure:")
-    
-    stack = [structure]
-    while stack:
-        current = stack.pop()
-        print(f"{len(stack)}  {current['name']} ({current['type']}) - {current.get('detection', 'N/A')}")
-        if 'children' in current:
-            stack.extend(current['children'])
+    print_tree_structure(structure)     
 
 if __name__ == "__main__":
     main()

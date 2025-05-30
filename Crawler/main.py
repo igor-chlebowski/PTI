@@ -1,7 +1,7 @@
 import os
 from pathlib  import Path
 
-from Detector.test import predict, preprocess_image
+from Detector.testhasy import predict, preprocess_image
 from MajorPredictor.main import MajorPredictor
 
 class Crawler:
@@ -59,8 +59,6 @@ class Crawler:
         This function runs Igor's ML model for character recognition on the file.
         """
         
-        img_arr = preprocess_image(leaf_path)
-        # show_two_windows(image_path, img_arr)
         try:
             print("-----------Starting prediction!")
             digit, conf = predict(leaf_path)
