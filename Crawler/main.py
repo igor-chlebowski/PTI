@@ -1,7 +1,7 @@
 import os
 from pathlib  import Path
 
-from Detector.testhasy import predict, preprocess_image
+from Detector.testhasy import predict, preprocess_image, remap_symbol
 from MajorPredictor.main import MajorPredictor
 
 class Crawler:
@@ -62,7 +62,8 @@ class Crawler:
         try:
             print("-----------Starting prediction!")
             digit, conf = predict(leaf_path)
-            print(f"Rozpoznana cyfra: {digit} (pewność: {conf:.2%})")
+            char = remap_symbol(int(digit))
+            print(f"Rozpoznana cyfra: {char} (pewność: {conf:.2%})")
             return digit
         except Exception as e:
             print("Błąd podczas predykcji:", e)
