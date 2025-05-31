@@ -17,6 +17,14 @@ class Crawler:
         self.recursive_crawl(self.path, structure)
         return structure
 
+    def get_x_y(self, path):
+        """
+        Get the x and y coordinates of the file in the directory structure.
+        This function is a placeholder and can be implemented as needed.
+        """
+        # Placeholder for actual implementation
+        args = os.path.basename(path).split('_')
+        return int(args[0]), int(args[1])
     
     def recursive_crawl(self, current_path, structure):
         """
@@ -27,21 +35,26 @@ class Crawler:
         if Crawler.is_leaf(current_path):
             leaf_path = os.path.join(current_path, os.listdir(current_path)[0])
             detection = self.handle_leaf(leaf_path)
-            structure['children'].append({'name': os.listdir(current_path)[0], 'type': 'file', 'path': leaf_path, 'detection': detection})
+            x, y, = self.get_x_y(leaf_path)
+            structure['children'].append({'name': os.listdir(current_path)[0], 'type': 'file', 'path': leaf_path, 'detection': detection, 'x': x, 'y': y})
+            print("X: ", x, "Y: ", y)
             return
 
         for entry in os.listdir(current_path):
             full_path = os.path.join(current_path, entry)
+            x, y, = self.get_x_y(full_path)
 
+            print("(w) X: ", x, "Y: ", y)
+            
             if os.path.isdir(full_path):
                 # If it's a directory, create a new entry in the structure
-                sub_structure = {'name': entry, 'type': 'directory', 'children': []}
+                sub_structure = {'name': entry, 'type': 'directory', 'children': [], 'x': x, 'y': y}
                 structure['children'].append(sub_structure)
                 self.recursive_crawl(full_path, sub_structure)
             else:
                 # If it's a file, add it to the current structure
                 detection = self.handle_complex_expression(full_path, entry)
-                structure['children'].append({'name': entry, 'type': 'file', 'path': full_path, 'detection': detection})
+                structure['children'].append({'name': entry, 'type': 'file', 'path': full_path, 'detection': detection, 'x': x, 'y': y})
 
     @staticmethod
     def is_leaf(path):

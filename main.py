@@ -54,6 +54,35 @@ def print_tree_structure(structure, level=0):
         for child in structure['children']:
             print_tree_structure(child, level + 1)
 
+def stupid_order(structure):
+    """
+    A primitve function to flatten the structure into a list.
+    Then sort it by x cordinate, and put predicated values in the row
+    """
+    flat_list = []
+
+    def flatten(struct):
+        flat_list.append(struct)
+        if 'children' in struct:
+            for child in struct['children']:
+                flatten(child)
+
+    flatten(structure)
+
+    # Sort by x coordinate
+    flat_list.sort(key=lambda x: x['x'] if 'x' in x else float('inf'))
+
+    flat_list = [item for item in flat_list if 'detection' in item and item['detection'] is not None]
+
+    for item in flat_list:
+        print(f"Item: {item['name']} - Detection: {item['detection']} X: {item['x']} Y: {item['y']} ")
+
+    # Join strings
+    ready = "".join(
+        f"{item['detection']} " for item in flat_list
+    )
+    return ready.strip()
+
 
 def main():
     # Main function to execute the image processing workflow
@@ -90,9 +119,13 @@ def main():
     # Run file crawler function
     crawler = Crawler(output_dir)
     structure = crawler.crawl()
+    print(structure)
 
     print("Crawled file structure:")
-    print_tree_structure(structure)     
+    print_tree_structure(structure)    
+
+    print("Stupid ordered string:")
+    print(stupid_order(structure)) 
 
 if __name__ == "__main__":
     main()
