@@ -153,9 +153,13 @@ def main():
 
     print("Crawled file structure:")
     print_tree_structure(structure)    
+    result = stupid_order(structure)
 
-    print("Stupid ordered string:")
-    print(stupid_order(structure)) 
+
+    print("Latex ordered string:")
+    print("\\begin\n")
+    print(result) 
+    print("\n\\end")
 
 if __name__ == "__main__":
     main()
