@@ -4,9 +4,13 @@ import random
 import shutil
 import os
 
+from types import SimpleNamespace
 from Crawler.main import Crawler
 from Segregator.process_image import prepare_image_for_contours, find_and_draw_contours, save_rois
 from Segregator.segregator import parse_filename, build_tree, save_tree
+
+MIN_CONTOUR_AREA = 20
+PADDING_PIXELS = 9
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process an image to find and save contours.")
@@ -82,6 +86,32 @@ def stupid_order(structure):
         f"{item['detection']} " for item in flat_list
     )
     return ready.strip()
+
+
+def run(image_path, output_dir):
+    temp_dir = "temp" + random.randint(0, 1000).__str__()
+
+    original, binary_after_thresh, closed_binary = prepare_image_for_contours(image_path)
+    if original is not None and closed_binary is not None:
+        image_with_boxes, padded_boxes = find_and_draw_contours(
+            original, closed_binary, MIN_CONTOUR_AREA, PADDING_PIXELS
+        )
+        
+        save_rois(original, padded_boxes, temp_dir)
+    else:
+        print("Error processing the image. Please check the input file path and format.")
+        return "error"
+
+    args = SimpleNamespace(overlap_threshold=0.5, min_contour_area=MIN_CONTOUR_AREA, padding_pixels=PADDING_PIXELS)
+    create_file_structure(args, temp_dir, output_dir)
+
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
+
+    # Run file crawler function
+    crawler = Crawler(output_dir)
+    structure = crawler.crawl()
+    return  stupid_order(structure)
 
 
 def main():

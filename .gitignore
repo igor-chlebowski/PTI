@@ -1,5 +1,7 @@
 venv
 *__pycache__*
 output*
+temp*
+uploads
 dane
 MajorPredictor/branchtex1.keras
